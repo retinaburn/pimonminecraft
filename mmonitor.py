@@ -22,7 +22,7 @@ def interaction():
     global State
     print("__starting interaction thread....")
     while True:
-        if SERVER_STATE == State.STOPPED or SERVER_STATE == STATE.STOPPING:
+        if SERVER_STATE == State.STOPPED or SERVER_STATE == State.STOPPING:
             print("__stopping")
             return
         elif SERVER_STATE != State.RUNNING:
@@ -41,9 +41,9 @@ interactionThread = threading.Thread(target=interaction)
 interactionThread.start()
 
 SERVER_STATE = State.NOT_STARTED
-minecraft = subprocess.Popen(["cd /home/cmoynes/Minecraft; /usr/bin/sh /home/cmoynes/Minecraft/start.sh"],
-                             shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-#minecraft = subprocess.Popen(["cd /home/cmoynes/pyplay; sh sample.sh"], shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+#minecraft = subprocess.Popen(["cd /home/cmoynes/Minecraft; /usr/bin/sh /home/cmoynes/Minecraft/start.sh"],
+#                                shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+minecraft = subprocess.Popen(["sh sample.sh"], shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 SERVER_STATE = State.STARTING
 SERVER_PROCESS = minecraft
 
