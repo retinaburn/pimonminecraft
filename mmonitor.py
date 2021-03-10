@@ -22,7 +22,7 @@ def interaction():
     global State
     print("__starting interaction thread....")
     while True:
-        if SERVER_STATE == State.STOPPED or SERVER_STATE == STATE.STOPPING:
+        if SERVER_STATE == State.STOPPED or SERVER_STATE == State.STOPPING:
             print("__stopping")
             return
         elif SERVER_STATE != State.RUNNING:
