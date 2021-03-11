@@ -23,20 +23,22 @@ def ledloop():
     global LED
     LED.color = (0, 0, 0)
     while True:
+        ## Turn off - Server Stopped
         if SERVER_STATE == State.STOPPED:
             LED.off
             return
-        ## Flash Yellow
+        ## Flash Yellow - Server Starting
         elif SERVER_STATE == State.STARTING:
             #LED.blink(on_time=1, off_time=1, on_color=(0,1,1))
             LED.color = (0, 1, 1)
             time.sleep(0.5)
             LED.color = (0, 0, 0)
-
             time.sleep(0.5)
+        ## Green - Server Running
         elif SERVER_STATE == State.RUNNING:
             LED.color = (0, 1, 0)
             time.sleep(0.5)
+        ## Red - Server Sopping
         elif SERVER_STATE == State.STOPPING:
             LED.color = (1, 0, 0)
             time.sleep(0.5)
@@ -73,9 +75,9 @@ ledThread = threading.Thread(target=ledloop)
 ledThread.start()
 
 SERVER_STATE = State.NOT_STARTED
-#minecraft = subprocess.Popen(["cd /home/cmoynes/Minecraft; /usr/bin/sh /home/cmoynes/Minecraft/start.sh"],
-#                                shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-minecraft = subprocess.Popen(["sh sample.sh"], shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+minecraft = subprocess.Popen(["cd /home/pi/MinecraftServer; /usr/bin/sh /home/pi/MinecraftServer/start.sh"],
+                               shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+#minecraft = subprocess.Popen(["sh sample.sh"], shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 SERVER_STATE = State.STARTING
 SERVER_PROCESS = minecraft
 
