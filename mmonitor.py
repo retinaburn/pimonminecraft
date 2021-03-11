@@ -3,6 +3,7 @@ from enum import Enum
 import time
 import threading
 
+from gpiozero import RGBLED
 
 class State(Enum):
     NOT_STARTED = 0
@@ -12,8 +13,35 @@ class State(Enum):
     STOPPING = 4
 
 
-global SERVER_STATE
-global SERVER_PROCESS
+SERVER_STATE = State.NOT_STARTED
+SERVER_PROCESS = None
+LED = None
+
+def ledloop():
+    global SERVER_STATE
+    global State
+    global LED
+    LED.color = (0, 0, 0)
+    while True:
+        if SERVER_STATE == State.STOPPED:
+            LED.off
+            return
+        ## Flash Yellow
+        elif SERVER_STATE == State.STARTING:
+            #LED.blink(on_time=1, off_time=1, on_color=(0,1,1))
+            LED.color = (0, 1, 1)
+            time.sleep(0.5)
+            LED.color = (0, 0, 0)
+
+            time.sleep(0.5)
+        elif SERVER_STATE == State.RUNNING:
+            LED.color = (0, 1, 0)
+            time.sleep(0.5)
+        elif SERVER_STATE == State.STOPPING:
+            LED.color = (1, 0, 0)
+            time.sleep(0.5)
+            LED.color = (0, 0, 0)
+            time.sleep(0.5)
 
 
 def interaction():
@@ -37,8 +65,12 @@ def interaction():
             time.sleep(1)  # wait for 1 second for command to be run
 
 
+
 interactionThread = threading.Thread(target=interaction)
 interactionThread.start()
+LED = RGBLED(red=9, green=10, blue=11)
+ledThread = threading.Thread(target=ledloop)
+ledThread.start()
 
 SERVER_STATE = State.NOT_STARTED
 #minecraft = subprocess.Popen(["cd /home/cmoynes/Minecraft; /usr/bin/sh /home/cmoynes/Minecraft/start.sh"],
@@ -68,3 +100,4 @@ while True:
 
 SERVER_STATE = State.STOPPED
 interactionThread.join()
+ledThread.join()
