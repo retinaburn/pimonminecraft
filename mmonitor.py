@@ -69,45 +69,47 @@ def interaction():
             SERVER_PROCESS.stdin.flush()
             time.sleep(1)  # wait for 1 second for command to be run
 
-
-
-interactionThread = threading.Thread(target=interaction)
-interactionThread.start()
 LED = RGBLED(red=9, green=10, blue=11)
-ledThread = threading.Thread(target=ledloop)
-ledThread.start()
-
 BUTTON = Button(21)
 
-print("Waiting for button...")
-BUTTON.wait_for_press()
-SERVER_STATE = State.NOT_STARTED
-print("STARTING SERVER")
-minecraft = subprocess.Popen(["cd /home/pi/MinecraftServer; /usr/bin/sh /home/pi/MinecraftServer/start.sh"],
-                               shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-#minecraft = subprocess.Popen(["sh sample.sh"], shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-SERVER_STATE = State.STARTING
-SERVER_PROCESS = minecraft
-
-
 while True:
-    output = minecraft.stdout.readline()
-    line = output.decode('utf-8').rstrip()
+    SERVER_STATE = State.NOT_STARTED
+    print("Waiting for button...")
+    BUTTON.wait_for_press()
+    print("Starting server")
 
-    if line == '' and minecraft.poll() is not None:
-        break
-    if line:
-        print("Read: %s" % line)
-        if "Done" in line:
-            print("MM: Ready to interact.")
-            SERVER_STATE = State.RUNNING
-        if "Stopping the server" in line:
-            print("MM: Detected stopping.")
-            SERVER_STATE = State.STOPPING
+    interactionThread = threading.Thread(target=interaction)
+    interactionThread.start()
 
-    rc = minecraft.poll
+    ledThread = threading.Thread(target=ledloop)
+    ledThread.start()
+
+    
+    minecraft = subprocess.Popen(["cd /home/pi/MinecraftServer; /usr/bin/sh /home/pi/MinecraftServer/start.sh"],
+                                shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    #minecraft = subprocess.Popen(["sh sample.sh"], shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    SERVER_STATE = State.STARTING
+    SERVER_PROCESS = minecraft
 
 
-SERVER_STATE = State.STOPPED
-interactionThread.join()
-ledThread.join()
+    while True:
+        output = minecraft.stdout.readline()
+        line = output.decode('utf-8').rstrip()
+
+        if line == '' and minecraft.poll() is not None:
+            break
+        if line:
+            print("Read: %s" % line)
+            if "Done" in line:
+                print("MM: Ready to interact.")
+                SERVER_STATE = State.RUNNING
+            if "Stopping the server" in line:
+                print("MM: Detected stopping.")
+                SERVER_STATE = State.STOPPING
+
+        rc = minecraft.poll
+
+
+    SERVER_STATE = State.STOPPED
+    interactionThread.join()
+    ledThread.join()
