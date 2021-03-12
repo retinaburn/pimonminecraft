@@ -32,7 +32,7 @@ def ledloop():
         ## Flash Yellow - Server Starting
         elif SERVER_STATE == State.STARTING:
             #LED.blink(on_time=1, off_time=1, on_color=(0,1,1))
-            LED.color = (0, 1, 1)
+            LED.color = (0, 1, 0)
             time.sleep(0.5)
             LED.color = (0, 0, 0)
             time.sleep(0.5)
