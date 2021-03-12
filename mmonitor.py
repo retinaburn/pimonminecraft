@@ -4,6 +4,7 @@ import time
 import threading
 
 from gpiozero import RGBLED
+from gpiozero import Button
 
 class State(Enum):
     NOT_STARTED = 0
@@ -16,6 +17,7 @@ class State(Enum):
 SERVER_STATE = State.NOT_STARTED
 SERVER_PROCESS = None
 LED = None
+BUTTON = None
 
 def ledloop():
     global SERVER_STATE
@@ -60,9 +62,10 @@ def interaction():
             time.sleep(2)
         else:
             print("__yay!")
-            userinput = input("Please enter your server command: ")
-
-            SERVER_PROCESS.stdin.write(bytearray(userinput+'\n', 'utf-8'))
+            #userinput = input("Please enter your server command: ")
+            print("__waiting for button...")
+            BUTTON.wait_for_press()
+            SERVER_PROCESS.stdin.write(bytearray('/stop\n', 'utf-8'))
             SERVER_PROCESS.stdin.flush()
             time.sleep(1)  # wait for 1 second for command to be run
 
@@ -74,7 +77,12 @@ LED = RGBLED(red=9, green=10, blue=11)
 ledThread = threading.Thread(target=ledloop)
 ledThread.start()
 
+BUTTON = Button(21)
+
+print("Waiting for button...")
+BUTTON.wait_for_press()
 SERVER_STATE = State.NOT_STARTED
+print("STARTING SERVER")
 minecraft = subprocess.Popen(["cd /home/pi/MinecraftServer; /usr/bin/sh /home/pi/MinecraftServer/start.sh"],
                                shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 #minecraft = subprocess.Popen(["sh sample.sh"], shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
