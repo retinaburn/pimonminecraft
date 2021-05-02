@@ -2,6 +2,7 @@ import subprocess
 from enum import Enum
 import time
 import threading
+from MenuDisplay import MenuDisplay
 
 from gpiozero import RGBLED
 from gpiozero import Button
@@ -18,6 +19,8 @@ SERVER_STATE = State.NOT_STARTED
 SERVER_PROCESS = None
 LED = None
 BUTTON = None
+menu = MenuDisplay()
+
 
 def ledloop():
     global SERVER_STATE
@@ -65,18 +68,34 @@ def interaction():
             #userinput = input("Please enter your server command: ")
             print("__waiting for button...")
             BUTTON.wait_for_press()
-            SERVER_PROCESS.stdin.write(bytearray('/stop\n', 'utf-8'))
+            SERVER_PROCESS.stdin.write(bytearray('stop\n', 'utf-8'))
             SERVER_PROCESS.stdin.flush()
             time.sleep(1)  # wait for 1 second for command to be run
 
 LED = RGBLED(red=9, green=10, blue=11)
 BUTTON = Button(21)
+UP_BUTTON = Button(5)
+DOWN_BUTTON = Button(6)
+
+UP_BUTTON.when_pressed = menu.up_action
+DOWN_BUTTON.when_pressed = menu.down_action
+
+level_selected = menu.level_name()
 
 while True:
     SERVER_STATE = State.NOT_STARTED
     print("Waiting for button...")
-    BUTTON.wait_for_press()
-    print("Starting server")
+
+    # let menu selection continue until button is pressed
+    while (not BUTTON.is_pressed):
+        if (menu.y_movement != 0):
+            menu.animate()
+            level_selected = menu.level_name()
+            print("Selected Level: %s %s" % (menu.selected_level, level_selected))
+
+
+    #BUTTON.wait_for_press()
+    print("Starting server with level: %s" % level_selected)
 
     interactionThread = threading.Thread(target=interaction)
     interactionThread.start()
@@ -85,7 +104,7 @@ while True:
     ledThread.start()
 
     
-    minecraft = subprocess.Popen(["cd /home/pi/MinecraftServer; /usr/bin/sh /home/pi/MinecraftServer/start.sh"],
+    minecraft = subprocess.Popen(["cd /home/pi/spigot; /usr/bin/sh /home/pi/spigot/start.sh"],
                                 shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     #minecraft = subprocess.Popen(["sh sample.sh"], shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     SERVER_STATE = State.STARTING
