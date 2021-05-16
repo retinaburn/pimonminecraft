@@ -83,6 +83,7 @@ DOWN_BUTTON.when_pressed = menu.down_action
 level_selected = menu.level_name()
 
 while True:
+    menu.enable()
     SERVER_STATE = State.NOT_STARTED
     print("Waiting for button...")
 
@@ -104,7 +105,8 @@ while True:
     ledThread.start()
 
     
-    minecraft = subprocess.Popen(["cd /home/pi/spigot; /usr/bin/sh /home/pi/spigot/start.sh"],
+    menu.disable()
+    minecraft = subprocess.Popen(["cd /home/pi/spigot; /usr/bin/bash /home/pi/spigot/start.sh %s" % level_selected],
                                 shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     #minecraft = subprocess.Popen(["sh sample.sh"], shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     SERVER_STATE = State.STARTING

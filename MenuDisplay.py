@@ -5,7 +5,8 @@ from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1306
 
 class MenuDisplay:
-    text_block = ["Dadda", "Test", "Lily", "Xander"]
+    is_enabled = True
+    text_block = ["Dadda", "Random", "Lily", "Xander"]
     selected_level = 0
     dy = 2             # The number of pixes to move each step of scroll animation
     time_diff = 0.001  # time to sleep each step of scroll animation
@@ -30,9 +31,8 @@ class MenuDisplay:
 
         draw.polygon( [triangle_p0, triangle_p1, triangle_p2], fill=255)
 
-    def __init__(self):
-
-        
+    def init(self):
+        self.selected_level = 0 #reset to 0 regardless of what it was previously set to
         self.disp.fill(0)
         self.disp.show()
 
@@ -75,6 +75,9 @@ class MenuDisplay:
 
         print("Selected level: %s %s" % (self.selected_level, self.text_block[self.selected_level]))
 
+    def __init__(self):
+        self.init()
+
     def animate(self):
         for i in range(int(self.font_size / self.dy)):
             time.sleep(self.time_diff)
@@ -103,5 +106,18 @@ class MenuDisplay:
     def level_name(self):
         return self.text_block[self.selected_level]
 
+    def blank_screen(self):
+        self.draw.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
+        self.disp.image(self.image)
+        self.disp.show()
+
+    def disable(self):
+        print ("Disable screen")
+        self.is_enabled = False
+        self.blank_screen()
+
+    def enable(self):
+        self.is_enabled = True
+        self.init()
 
 
